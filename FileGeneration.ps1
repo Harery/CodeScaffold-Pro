@@ -1,4 +1,5 @@
-# FileGeneration.ps1 - File generation functions for CodeScaffold Pro
+# FileGeneration.ps1 - File generation functions for CodeScaffold Pro #
+# This script contains functions to generate various files for a Python project.
 
 function New-MainPy {
     param([string]$TemplateType)
