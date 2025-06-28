@@ -5,7 +5,7 @@ function Get-PythonTemplates {
         "minimal" = @{
             description  = "Minimal Python project with best-practice dev dependencies"
             dependencies = @(
-                "setuptools", "pre-commit", "mypy", "rich", "pipenv", "virtualenv", "venv", "loguru", "python-dotenv", "black", "pip"
+                "setuptools", "pre-commit", "mypy", "rich", "pipenv", "virtualenv", "loguru", "python-dotenv", "black", "pip"
             )
         }
         "empty" = @{
