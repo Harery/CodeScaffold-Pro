@@ -129,10 +129,10 @@ function Show-ProjectNameDialog {
     return $null
 }
 
-function Show-TemplateDialog {
+function Show-OSTemplateOptionsDialog {
     $form = New-Object System.Windows.Forms.Form
-    $form.Text = "🐍 Select Python Template"
-    $form.Size = New-Object System.Drawing.Size(750, 400)
+    $form.Text = "🖥️ Select OS Features for Dockerfile"
+    $form.Size = New-Object System.Drawing.Size(500, 420)
     $form.StartPosition = "CenterScreen"
     $form.FormBorderStyle = "FixedDialog"
     $form.MaximizeBox = $false
@@ -140,70 +140,40 @@ function Show-TemplateDialog {
     $form.BackColor = [System.Drawing.Color]::FromArgb(248, 249, 250)
     Set-HighQualityRendering $form
 
-    # Title Label
     $titleLabel = New-Object System.Windows.Forms.Label
-    $titleLabel.Text = "Choose Your Python Template"
+    $titleLabel.Text = "Choose OS Features to Include in Dockerfile:"
     $titleLabel.Location = New-Object System.Drawing.Point(30, 25)
-    $titleLabel.Size = New-Object System.Drawing.Size(450, 35)
-    $titleLabel.Font = New-Object System.Drawing.Font("Segoe UI", 16, [System.Drawing.FontStyle]::Bold, [System.Drawing.GraphicsUnit]::Point)
-    $titleLabel.ForeColor = [System.Drawing.Color]::FromArgb(32, 33, 36)
+    $titleLabel.Size = New-Object System.Drawing.Size(420, 35)
+    $titleLabel.Font = New-Object System.Drawing.Font("Segoe UI", 14, [System.Drawing.FontStyle]::Bold)
     $form.Controls.Add($titleLabel)
 
-    # Template ListBox
-    $templateListBox = New-Object System.Windows.Forms.ListBox
-    $templateListBox.Location = New-Object System.Drawing.Point(30, 70)
-    $templateListBox.Size = New-Object System.Drawing.Size(340, 120)
-    $templateListBox.Font = New-Object System.Drawing.Font("Segoe UI", 11, [System.Drawing.FontStyle]::Regular, [System.Drawing.GraphicsUnit]::Point)
-    $templateListBox.BackColor = [System.Drawing.Color]::White
-    $form.Controls.Add($templateListBox)
+    $checkboxes = @{}
+    $features = @(
+        @{ Name = 'Apt Utils';        Key = 'AptUtils';    Default = $true;   Desc = 'Install apt-utils (recommended for apt scripts)'; },
+        @{ Name = 'Locales';          Key = 'Locales';    Default = $true;   Desc = 'Install and configure locales (UTF-8, Arabic)'; },
+        @{ Name = 'SSH Server';       Key = 'SSH';        Default = $false;  Desc = 'Install and configure OpenSSH server'; },
+        @{ Name = 'Python';           Key = 'Python';     Default = $false;  Desc = 'Install Python 3, pip, and dev tools'; },
+        @{ Name = 'Node.js & npm';    Key = 'Node';       Default = $false;  Desc = 'Install Node.js (LTS) and npm'; },
+        @{ Name = 'UFW Firewall';     Key = 'UFW';        Default = $false;  Desc = 'Install and configure UFW firewall'; },
+        @{ Name = 'Fail2Ban';         Key = 'Fail2Ban';   Default = $false;  Desc = 'Install Fail2Ban for SSH protection'; }
+    )
+    $y = 70
+    foreach ($feature in $features) {
+        $cb = New-Object System.Windows.Forms.CheckBox
+        $cb.Text = $feature.Name + "  -  " + $feature.Desc
+        $cb.Location = New-Object System.Drawing.Point(40, $y)
+        $cb.Size = New-Object System.Drawing.Size(400, 25)
+        $cb.Checked = $feature.Default
+        $form.Controls.Add($cb)
+        $checkboxes[$feature.Key] = $cb
+        $y += 35
+    }
 
-    # Description Label
-    $descLabel = New-Object System.Windows.Forms.Label
-    $descLabel.Text = "Description:"
-    $descLabel.Location = New-Object System.Drawing.Point(390, 70)
-    $descLabel.Size = New-Object System.Drawing.Size(120, 25)
-    $descLabel.Font = New-Object System.Drawing.Font("Segoe UI", 12, [System.Drawing.FontStyle]::Bold, [System.Drawing.GraphicsUnit]::Point)
-    $descLabel.ForeColor = [System.Drawing.Color]::FromArgb(32, 33, 36)
-    $form.Controls.Add($descLabel)
-
-    # Description TextBox
-    $descTextBox = New-Object System.Windows.Forms.TextBox
-    $descTextBox.Location = New-Object System.Drawing.Point(390, 100)
-    $descTextBox.Size = New-Object System.Drawing.Size(310, 70)
-    $descTextBox.Font = New-Object System.Drawing.Font("Segoe UI", 10, [System.Drawing.FontStyle]::Regular, [System.Drawing.GraphicsUnit]::Point)
-    $descTextBox.Multiline = $true
-    $descTextBox.ReadOnly = $true
-    $descTextBox.BackColor = [System.Drawing.Color]::FromArgb(248, 249, 250)
-    $descTextBox.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
-    $form.Controls.Add($descTextBox)
-
-    # Custom Dependencies Section
-    $customDepsLabel = New-Object System.Windows.Forms.Label
-    $customDepsLabel.Text = "Additional Dependencies (optional):"
-    $customDepsLabel.Location = New-Object System.Drawing.Point(30, 200)
-    $customDepsLabel.Size = New-Object System.Drawing.Size(350, 25)
-    $customDepsLabel.Font = New-Object System.Drawing.Font("Segoe UI", 12, [System.Drawing.FontStyle]::Bold, [System.Drawing.GraphicsUnit]::Point)
-    $customDepsLabel.ForeColor = [System.Drawing.Color]::FromArgb(32, 33, 36)
-    $form.Controls.Add($customDepsLabel)
-
-    # Custom Dependencies TextBox
-    $customDepsTextBox = New-Object System.Windows.Forms.TextBox
-    $customDepsTextBox.Location = New-Object System.Drawing.Point(30, 230)
-    $customDepsTextBox.Size = New-Object System.Drawing.Size(670, 60)
-    $customDepsTextBox.Font = New-Object System.Drawing.Font("Consolas", 10, [System.Drawing.FontStyle]::Regular, [System.Drawing.GraphicsUnit]::Point)
-    $customDepsTextBox.Multiline = $true
-    $customDepsTextBox.ScrollBars = [System.Windows.Forms.ScrollBars]::Vertical
-    $customDepsTextBox.BackColor = [System.Drawing.Color]::White
-    $customDepsTextBox.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
-    $customDepsTextBox.Text = "# Enter additional dependencies, one per line`n# Example:`n# requests>=2.28.0"
-    $form.Controls.Add($customDepsTextBox)
-
-    # Create Button
     $okButton = New-Object System.Windows.Forms.Button
-    $okButton.Location = New-Object System.Drawing.Point(520, 310)
-    $okButton.Size = New-Object System.Drawing.Size(85, 38)
+    $okButton.Location = New-Object System.Drawing.Point(270, 340)
+    $okButton.Size = New-Object System.Drawing.Size(90, 38)
     $okButton.Text = "Create"
-    $okButton.Font = New-Object System.Drawing.Font("Segoe UI", 11, [System.Drawing.FontStyle]::Bold, [System.Drawing.GraphicsUnit]::Point)
+    $okButton.Font = New-Object System.Drawing.Font("Segoe UI", 11, [System.Drawing.FontStyle]::Bold)
     $okButton.BackColor = [System.Drawing.Color]::FromArgb(26, 115, 232)
     $okButton.ForeColor = [System.Drawing.Color]::White
     $okButton.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
@@ -211,12 +181,11 @@ function Show-TemplateDialog {
     $okButton.DialogResult = [System.Windows.Forms.DialogResult]::OK
     $form.Controls.Add($okButton)
 
-    # Cancel Button
     $cancelButton = New-Object System.Windows.Forms.Button
-    $cancelButton.Location = New-Object System.Drawing.Point(615, 310)
-    $cancelButton.Size = New-Object System.Drawing.Size(85, 38)
+    $cancelButton.Location = New-Object System.Drawing.Point(370, 340)
+    $cancelButton.Size = New-Object System.Drawing.Size(90, 38)
     $cancelButton.Text = "Cancel"
-    $cancelButton.Font = New-Object System.Drawing.Font("Segoe UI", 11, [System.Drawing.FontStyle]::Regular, [System.Drawing.GraphicsUnit]::Point)
+    $cancelButton.Font = New-Object System.Drawing.Font("Segoe UI", 11, [System.Drawing.FontStyle]::Regular)
     $cancelButton.BackColor = [System.Drawing.Color]::FromArgb(241, 243, 244)
     $cancelButton.ForeColor = [System.Drawing.Color]::FromArgb(60, 64, 67)
     $cancelButton.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
@@ -225,56 +194,18 @@ function Show-TemplateDialog {
     $cancelButton.DialogResult = [System.Windows.Forms.DialogResult]::Cancel
     $form.Controls.Add($cancelButton)
 
-    # Template data
-    $templates = Get-PythonTemplates
-    $templateData = @()
-    foreach ($key in $templates.Keys) {
-        $template = $templates[$key]
-        $templateListBox.Items.Add($template.description) | Out-Null
-        $templateData += @{
-            Key = $key
-            Description = $template.description
-            Dependencies = $template.dependencies
-        }
-    }
-
-    # Event handler for template selection
-    $templateListBox.Add_SelectedIndexChanged({
-        if ($templateListBox.SelectedIndex -ge 0) {
-            $selected = $templateData[$templateListBox.SelectedIndex]
-            $descTextBox.Text = $selected.Description
-        }
-    })
-
-    # Select first template by default
-    if ($templateListBox.Items.Count -gt 0) {
-        $templateListBox.SelectedIndex = 0
-    }
-
     $result = $form.ShowDialog()
-    
-    if ($result -eq [System.Windows.Forms.DialogResult]::OK -and $templateListBox.SelectedIndex -ge 0) {
-        $selectedTemplate = $templateData[$templateListBox.SelectedIndex]
-        
-        # Parse custom dependencies
-        $customDeps = @()
-        if (-not [string]::IsNullOrEmpty($customDepsTextBox.Text)) {
-            $lines = $customDepsTextBox.Text -split "`n"
-            foreach ($line in $lines) {
-                $line = $line.Trim()
-                if (-not [string]::IsNullOrEmpty($line) -and -not $line.StartsWith("#")) {
-                    $customDeps += $line
-                }
-            }
-        }
-
+    if ($result -eq [System.Windows.Forms.DialogResult]::OK) {
         return @{
-            Key = $selectedTemplate.Key
-            Description = $selectedTemplate.Description
-            Dependencies = $selectedTemplate.Dependencies + $customDeps
+            InstallAptUtils = $checkboxes['AptUtils'].Checked
+            InstallLocales = $checkboxes['Locales'].Checked
+            InstallSSH = $checkboxes['SSH'].Checked
+            InstallPython = $checkboxes['Python'].Checked
+            InstallNode = $checkboxes['Node'].Checked
+            InstallUFW = $checkboxes['UFW'].Checked
+            InstallFail2Ban = $checkboxes['Fail2Ban'].Checked
         }
     }
-    
     return $null
 }
 

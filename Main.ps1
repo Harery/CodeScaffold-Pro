@@ -134,17 +134,14 @@ function Invoke-MainLogic {
     }
     #endregion
     
-    #region Template selection
-    Write-Info "Select project template..."
-    $templateInfo = Show-TemplateDialog
-    if (-not $templateInfo) {
+    #region OS Template selection
+    Write-Info "Select OS features for your Dockerfile..."
+    $osOptions = Show-OSTemplateOptionsDialog
+    if (-not $osOptions) {
         Write-Info "Operation cancelled."
         return
     }
-    Write-Success "Selected template: $($templateInfo.Key)"
-    if ($templateInfo.Dependencies.Count -gt 0) {
-        Write-Info "Dependencies: $($templateInfo.Dependencies -join ', ')"
-    }
+    Write-Success "Selected OS features: $(($osOptions.GetEnumerator() | Where-Object { $_.Value } | ForEach-Object { $_.Key }) -join ', ')"
     #endregion
 
     #region Dynamic port assignment
@@ -173,17 +170,21 @@ function Invoke-MainLogic {
     #region File generation
     # Internal config file for storing project metadata
     $files = @{
-        "main.py" = New-MainPy $templateInfo.Key
-        "Dockerfile" = New-Dockerfile $templateInfo.Key
-        "requirements.txt" = New-RequirementsTxt $templateInfo.Dependencies
-        "README.md" = New-ReadmeMd $projectName $templateInfo.Key
+        "main.py" = New-MainPy "os"
+        "Dockerfile" = New-Dockerfile -InstallAptUtils:$($osOptions.InstallAptUtils) -InstallLocales:$($osOptions.InstallLocales) -InstallSSH:$($osOptions.InstallSSH) -InstallPython:$($osOptions.InstallPython) -InstallNode:$($osOptions.InstallNode) -InstallUFW:$($osOptions.InstallUFW) -InstallFail2Ban:$($osOptions.InstallFail2Ban)
+        "README.md" = New-ReadmeMd $projectName "os"
         ".gitignore" = New-GitIgnore
-        ".project.config" = New-ProjectConfig $projectName $templateInfo.Key
-        "docker-compose.yml" = New-DockerCompose $projectName "python main.py" $hostPort
+        ".project.config" = New-ProjectConfig $projectName "os"
     }
-    
+    if ($osOptions.InstallPython) {
+        $files["requirements.txt"] = New-RequirementsTxt @()
+    }
+    if ($osOptions.InstallPython) {
+        $files["docker-compose.yml"] = New-DockerCompose $projectName "python main.py" $hostPort
+    }
     foreach ($file in $files.GetEnumerator()) {
         $filePath = Join-Path $fullProjectPath $file.Key
+        # Write all files using Out-File to ensure real newlines
         $file.Value | Out-File -FilePath $filePath -Encoding UTF8
         Write-Success "Created $($file.Key)"
     }

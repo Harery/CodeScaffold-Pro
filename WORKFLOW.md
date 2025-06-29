@@ -1,25 +1,32 @@
 # CodeScaffold Pro: Project Workflow
 
 ## 1. Project Generation
-- Run `.\CodeScaffold_Pro.ps1` in PowerShell
+
+- Run `./CodeScaffold_Pro.ps1` in PowerShell 7+
 - Follow UI prompts:
   - Select project folder
   - Enter project name
-  - Choose template and dependencies
+  - Select Ubuntu OS features (Apt Utils, Locales, SSH, Python, Node.js, UFW, Fail2Ban) via checkboxes
 - Script generates:
-  - Project files (main.py, requirements.txt, README.md, .gitignore, Dockerfile, docker-compose.yml, .devcontainer/devcontainer.json)
+  - Project files (Dockerfile, docker-compose.yml, .devcontainer/devcontainer.json, README.md, .gitignore, etc.)
   - Initializes Git
-  - Builds and runs Docker container
-  - Sets up Python venv and dependencies inside container
-  - Prints a colorized summary table of all running Docker containers (with image/tag and base image/tag)
+  - Ready for Docker build and development
+
+> **Note:** To use UFW and iptables-based features, you must run your container with the `--privileged` flag:
+>
+> ```sh
+> docker run --privileged -p 8000:8000 <image>
+> ```
 
 ## 2. Development
+
 - Open project in VS Code
-- Use Dev Containers: "Reopen in Container" from the Command Palette (F1) for full-featured development
-- The Python interpreter inside the container is automatically used by VS Code
+- Use Dev Containers: "Reopen in Container" for full-featured development
+- The Ubuntu-based Python/Node.js interpreter inside the container is automatically used by VS Code
 - Linting, formatting, and requirements are pre-configured
 
 ## 3. Contribution Workflow
+
 - Fork and clone the repository
 - Create a new branch for your feature or fix
 - Make changes and commit with clear messages
@@ -27,9 +34,11 @@
 - Follow code review and CI feedback
 
 ## 4. Release & Maintenance
+
 - Tag releases using Git
 - Update documentation and templates as needed
 - Review issues and PRs regularly
 
 ---
-*For more, see README.md and PRD.md*
+
+For more, see README.md and PRD.md

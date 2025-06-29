@@ -35,23 +35,17 @@ if __name__ == "__main__":
 }
 
 function New-Dockerfile {
-    param([string]$TemplateType)
-    
-    return @"
-FROM python:3.11-slim
-
-WORKDIR /app
-
-# Copy requirements first for better caching
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy application code
-COPY . .
-
-# Run the application
-CMD ["python", "main.py"]
-"@
+    param(
+        [bool]$InstallAptUtils = $true,
+        [bool]$InstallLocales = $true,
+        [bool]$InstallSSH = $false,
+        [bool]$InstallPython = $false,
+        [bool]$InstallNode = $false,
+        [bool]$InstallUFW = $false,
+        [bool]$InstallFail2Ban = $false
+    )
+    # Use OS template from Templates.ps1
+    return Get-OSTemplates -InstallAptUtils:$InstallAptUtils -InstallLocales:$InstallLocales -InstallSSH:$InstallSSH -InstallPython:$InstallPython -InstallNode:$InstallNode -InstallUFW:$InstallUFW -InstallFail2Ban:$InstallFail2Ban
 }
 
 function New-RequirementsTxt {
